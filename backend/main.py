@@ -14,17 +14,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Environment variables
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
 # Global connection variable
 conn = None
 
-# Try DB connection on startup
-try:
-    conn = psycopg2.connect(DATABASE_URL)
-except Exception as e:
-    print("❌ Database connection failed:", e)
+# Connect to DB when the app starts
+@app.on_event("startup")
+def startup_event():
+    global conn
+    try:
+        DATABASE_URL = os.environ.get("DATABASE_URL")
+        conn = psycopg2.connect(DATABASE_URL)
+        print("✅ Database connected successfully!")
+    except Exception as e:
+        print("❌ Database connection failed:", e)
 
 @app.get("/")
 def root():
@@ -38,14 +40,13 @@ def health_check():
 def get_employees():
     if not conn:
         return {"error": "❌ Database not connected."}
-
+    
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM modern_employees")
         rows = cursor.fetchall()
         columns = [desc[0] for desc in cursor.description]
         cursor.close()
-        result = [dict(zip(columns, row)) for row in rows]
-        return result
+        return [dict(zip(columns, row)) for row in rows]
     except Exception as e:
         return {"error": str(e)}
