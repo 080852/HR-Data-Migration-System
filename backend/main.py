@@ -5,7 +5,7 @@ import os
 
 app = FastAPI()
 
-# CORS setup
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,26 +14,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Read DATABASE_URL from environment variable
+# Environment variables
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Global connection variable
+conn = None
+
+# Try DB connection on startup
 try:
     conn = psycopg2.connect(DATABASE_URL)
-    cursor = conn.cursor()
 except Exception as e:
     print("❌ Database connection failed:", e)
-    cursor = None
 
 @app.get("/")
 def root():
-    return {"message": "HR Migration API Live on Render"}
+    return {"message": "🚀 HR Migration API is Live on Render!"}
+
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}
 
 @app.get("/api/employees")
 def get_employees():
-    if not cursor:
-        return {"error": "Database not connected."}
-    cursor.execute("SELECT * FROM modern_employees")
-    rows = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-    result = [dict(zip(columns, row)) for row in rows]
-    return result
+    if not conn:
+        return {"error": "❌ Database not connected."}
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM modern_employees")
+        rows = cursor.fetchall()
+        columns = [desc[0] for desc in cursor.description]
+        cursor.close()
+        result = [dict(zip(columns, row)) for row in rows]
+        return result
+    except Exception as e:
+        return {"error": str(e)}
