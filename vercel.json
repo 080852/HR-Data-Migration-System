@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://hr-backend-o0ga.onrender.com/api/$1"
+    }
+  ]
+}
