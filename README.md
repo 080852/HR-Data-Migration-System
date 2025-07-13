@@ -12,7 +12,7 @@ Converts raw HR employee data into structured format.
 
 ## Live Links
 🔗 Backend: https://hr-backend-o0ga.onrender.com
-🔗 Frontend: https://hr-migration.vercel.app
+🔗 Frontend: https://hr-data-migration-system-git-main-080852s-projects.vercel.app/
 
 ## Screenshots
 <img src="./screenshots/dashboard.png" width="600" />
